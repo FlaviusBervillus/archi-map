@@ -1,0 +1,11 @@
+{
+  "name": "archi-map",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cartographie interactive de l'architecture d'un projet : arborescence, dépendances, doublons de traductions.",
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes http-server -c-1 -p 8080 .",
+    "test": "node --test test/*.test.js"
+  }
+}

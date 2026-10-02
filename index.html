@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ArchiMap</title>
+  <meta name="description" content="Cartographie interactive d'un projet : arborescence, liens entre fichiers, doublons de traductions et pistes d'optimisation." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='8' cy='8' r='5' fill='%234c6ef5'/%3E%3Ccircle cx='24' cy='10' r='4' fill='%2312b886'/%3E%3Ccircle cx='14' cy='24' r='5' fill='%23f59f00'/%3E%3Cpath d='M8 8L24 10M8 8L14 24M24 10L14 24' stroke='%23868e96' stroke-width='2'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true"><path d="M8 8L24 10M8 8L14 24M24 10L14 24" stroke="currentColor" stroke-width="2" opacity=".45"/><circle cx="8" cy="8" r="5" fill="#4c6ef5"/><circle cx="24" cy="10" r="4" fill="#12b886"/><circle cx="14" cy="24" r="5" fill="#f59f00"/></svg>
+      <span>ArchiMap</span>
+      <span id="project-name" class="project-name"></span>
+    </div>
+    <nav id="tabs" class="tabs" hidden>
+      <button data-tab="overview" class="active">Vue d'ensemble</button>
+      <button data-tab="tree">Arborescence</button>
+      <button data-tab="graph">Graphe des liens</button>
+      <button data-tab="i18n">Traductions <span id="tab-i18n-count" class="count"></span></button>
+      <button data-tab="insights">Optimisations <span id="tab-insights-count" class="count"></span></button>
+    </nav>
+    <div class="actions">
+      <button id="btn-open" class="btn primary">Ouvrir un dossier</button>
+      <button id="btn-rescan" class="btn" hidden title="Relire le même dossier après modification">Rescanner</button>
+      <button id="btn-settings" class="btn ghost" title="Dossiers ignorés" aria-label="Paramètres">⚙</button>
+      <button id="btn-theme" class="btn ghost" title="Thème clair / sombre" aria-label="Changer de thème">◐</button>
+      <input id="dir-input" type="file" webkitdirectory directory multiple hidden />
+    </div>
+  </header>
+
+  <main id="main">
+    <section id="welcome" class="welcome">
+      <div id="dropzone" class="dropzone">
+        <h1>Cartographiez votre application</h1>
+        <p class="lead">Déposez le dossier de votre projet ici (ou cliquez sur <b>Ouvrir un dossier</b>).
+          ArchiMap affiche l'arborescence, les liens entre les fichiers, et repère les <b>doublons dans vos fichiers de traduction</b>
+          (« Annuler », « Email »…) pour vous aider à tout regrouper.</p>
+        <div class="welcome-actions">
+          <button id="btn-open-2" class="btn primary big">Ouvrir un dossier</button>
+          <button id="btn-demo" class="btn big">Essayer avec un projet de démo</button>
+        </div>
+        <ul class="features">
+          <li><b>Arborescence</b> avec, pour chaque fichier, ce qu'il importe et qui l'utilise</li>
+          <li><b>Graphe interactif</b> des dépendances (par fichier ou par dossier), cycles en rouge</li>
+          <li><b>Traductions</b> : doublons, clés inutilisées ou manquantes, textes écrits en dur, plan de regroupement exportable</li>
+          <li><b>Optimisations</b> : fichiers orphelins, fichiers identiques, noms en double, gros fichiers…</li>
+        </ul>
+        <p class="privacy">🔒 Tout est analysé localement dans votre navigateur : aucun fichier n'est envoyé sur internet.</p>
+        <p class="hint">Compatible JS/TS (React, Vue, Angular, Svelte), CSS/SCSS, Flutter/Dart, Python, PHP, HTML.
+          Traductions : JSON (i18next, vue-i18n, ngx-translate…), ARB, YAML, Android <code>strings.xml</code>, iOS <code>.strings</code>, <code>.properties</code>.</p>
+      </div>
+    </section>
+
+    <section id="view-overview" class="view" hidden></section>
+    <section id="view-tree" class="view" hidden></section>
+    <section id="view-graph" class="view" hidden></section>
+    <section id="view-i18n" class="view" hidden></section>
+    <section id="view-insights" class="view" hidden></section>
+  </main>
+
+  <aside id="details" class="details" hidden aria-label="Détails">
+    <button id="details-close" class="details-close" aria-label="Fermer">×</button>
+    <div id="details-body"></div>
+  </aside>
+
+  <div id="progress" class="progress" hidden>
+    <div class="progress-card">
+      <p id="progress-text">Lecture des fichiers…</p>
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <dialog id="settings">
+    <form method="dialog">
+      <h2>Dossiers ignorés</h2>
+      <p class="muted">Noms de dossiers à ne pas analyser, séparés par des virgules.</p>
+      <textarea id="ignores" rows="5"></textarea>
+      <div class="dialog-actions">
+        <button value="reset" class="btn ghost" id="ignores-reset">Valeurs par défaut</button>
+        <button value="ok" class="btn primary">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="dragover" class="dragover" hidden><p>Déposez le dossier pour l'analyser</p></div>
+  <div id="toast" class="toast" hidden></div>
+</body>
+</html>
